@@ -1,7 +1,10 @@
 import csv
-from random import randint
+from random import sample
 import requests
 import json
+import re
+import operator
+import popular_movies
 
 def generate_random_list(min, max, size):
   list = []
@@ -17,35 +20,52 @@ def generate_random_list(min, max, size):
 def get_random_number(min, max):
   return randint(min, max)
 
-def get_csv_count(path):
-  with open(path) as csvfile:
-    reader = csv.reader(csvfile, delimiter=' ', quotechar='|')
-    return sum(1 for row in reader)
+def get_movies_from(year):
+  movie_ids = []
+  with open('./Data/movies.csv') as csvfile:
+    reader = csv.DictReader(csvfile)
+    for row in reader:
+      movie_title = row['title']
+      movie_year_re = re.search(r'\((\d*?)\)', movie_title)
+      if movie_year_re:
+        movie_year = movie_year_re.group(1)
+        if int(movie_year) > year:
+          movie_ids.append(row['movieId'])
+  return movie_ids
+
+def sort_movies_by_votes(index_list):
+  movies = {}
+  with open('./Data/ratings.csv') as csvfile:
+    reader = csv.DictReader(csvfile)
+    for row in reader:
+      movie_id = row['movieId']
+      if movie_id in index_list:
+        if movie_id in movies:
+          movies[movie_id] += 1
+        else:
+          movies[movie_id] = 0
+  sorted_movies = sorted(movies.items(), key=operator.itemgetter(1), reverse = True)
+  sorted_movie_ids = list(map(lambda k: k[0], sorted_movies))
+  return sorted_movie_ids
 
 def get_movies(index_list):
   movies = []
   with open('./Data/links.csv') as csvfile:
     reader = csv.DictReader(csvfile)
-    for i, row in enumerate(reader):
-      if i in index_list:
+    for row in reader:
+      if row['movieId'] in index_list:
         movies.append(row)
   return movies
 
-## Main
-
 def get_suggested_movies():
-  row_count = get_csv_count('./Data/links.csv')
-  random_list = generate_random_list(0, row_count, 9)
-  movies = get_movies(random_list)
+  movie_ids = []
+  movies = popular_movies.get_movies()
+  for movie in movies.find():
+    movie_ids.append(movie['id'])
+  random_list = sample(movie_ids, 9)
   movies_info = []
-  ombd_key = 'f76a9fd7'
-
-  for movie in movies:
-    movie_imdb_id = 'tt' + movie['imdbId']
-    url = 'http://www.omdbapi.com/?apikey=' + ombd_key + '&i=' + movie_imdb_id
-    r = requests.get(url)
-    imdb_movie = r.json()
-    movie = { 'name': imdb_movie['Title'], 'poster': imdb_movie['Poster'] }
-    movies_info.append(movie)
-
+  for index in random_list:
+    movie = movies.find_one({ 'id': index })
+    movie_info = { 'id': movie['id'], 'name': movie['name'], 'poster': movie['poster'] }
+    movies_info.append(movie_info)
   return movies_info

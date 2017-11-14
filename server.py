@@ -2,10 +2,12 @@
 
 from flask import Flask, request
 from flask_restful import Resource, Api
+from flask_cors import CORS
 from json import dumps
 import info
 
 app = Flask(__name__)
+CORS(app)
 api = Api(app)
 
 class Peliculas(Resource):
@@ -22,4 +24,4 @@ api.add_resource(Peliculas, '/pelis') # Route_1
 api.add_resource(PeliculasSugerencias, '/peliculas_sugeridas') # Route_2
 
 if __name__ == '__main__':
-     app.run(port='5002')
+     app.run(port='3000')

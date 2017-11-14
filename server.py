@@ -35,4 +35,4 @@ api.add_resource(Peliculas, '/pelis') # Route_1
 api.add_resource(PeliculasSugerencias, '/peliculas_sugeridas') # Route_2
 
 if __name__ == '__main__':
-     app.run(port='3000')
+     app.run(port='3000', threaded=True)

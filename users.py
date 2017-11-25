@@ -25,11 +25,11 @@ def get_users_ratings():
 
 def save_user_ratings(ratings):
   user_id = get_next_sequence()
-  for (movieId, rating) in ratings:
+  for rating in ratings:
     user_rating = {
       'userId': user_id,
-      'movieId': movieId,
-      'rating': rating,
+      'movieId': rating['movie_id'],
+      'rating': rating['rating'],
       'timestamp': int(time.time())
     }
     users_ratings.insert_one(user_rating)

@@ -1,7 +1,9 @@
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 from collections import defaultdict
-from surprise import Reader, Dataset, SVD, evaluate
+from surprise import Reader, Dataset, SVD, evaluate, dump
+import os
+
 
 def get_top_n(predictions, n=10):
     # First map the predictions to each user.
@@ -16,28 +18,22 @@ def get_top_n(predictions, n=10):
 
     return top_n
 
-# First train an SVD algorithm on the movielens dataset.
-with open('./ml-100k/u.data') as f:
-    all_lines = f.readlines()
+def get_top_n_uid(predictions, user_id, n=10):
+    # First map the predictions to each user.
+    top_n = []
+    for uid, iid, true_r, est, _ in predictions:
+        if user_id == uid: top_n.append((iid,est))
+    print(top_n)
+    top_n.sort(key=lambda x: x[1], reverse=True)
+    top_n_ids = top_n[:n]
+    print(top_n_ids)
+    return [x[0] for x in top_n_ids]
 
-# Prepare the data to be used in Surprise
-reader = Reader(line_format='user item rating timestamp', sep='\t')
-data = Dataset.load_from_file('./ml-100k/u.data', reader=reader)
-
-trainset = data.build_full_trainset()
-algo = SVD()
-algo.train(trainset)
-
-# Than predict ratings for all pairs (u, i) that are NOT in the training set.
-testset = trainset.build_anti_testset()
-
-userTestset = list(filter(lambda row: row[0] == '944', testset))
-
-predictions = algo.test(userTestset)
-
-top_n = get_top_n(predictions, n=10)
-
-# Print the recommended items for each user
-for uid, user_ratings in top_n.items():
-    print(uid, [iid for (iid, _) in user_ratings])
-
+def inicializar_algoritmo():
+    reader = Reader(line_format='user item rating timestamp', sep='\t')
+    data = Dataset.load_from_file('./ml-100k/u.data', reader=reader)
+    trainset = data.build_full_trainset()
+    algo = SVD()
+    algo.train(trainset)
+    testset = trainset.build_anti_testset()
+    return (algo, testset)

@@ -5,6 +5,7 @@ import json
 import re
 import operator
 import popular_movies
+import pandas as pd
 
 def generate_random_list(min, max, size):
   list = []
@@ -69,3 +70,20 @@ def get_suggested_movies():
     movie_info = { 'id': movie['id'], 'name': movie['name'], 'poster': movie['poster'] }
     movies_info.append(movie_info)
   return movies_info
+
+def get_movies_imdb_id(movies_id):
+    movies_id_posta = list(map(lambda x: str(x), movies_id))
+    movies_imdb_ids = list(map(lambda x: x['imdbId'] ,get_movies(movies_id_posta)))
+    return movies_imdb_ids
+
+def get_movie_info(movie_imdb_id):
+  ombd_key = 'f76a9fd7'
+  movie_imdb_id = 'tt' + movie_imdb_id
+  url = 'http://www.omdbapi.com/?apikey=' + ombd_key + '&i=' + movie_imdb_id
+  r = requests.get(url)
+  imdb_movie = r.json()
+  movie = { 'name': imdb_movie['Title'], 'poster': imdb_movie['Poster'] }
+  try:
+    return movie
+  except Exception:
+    return {'fail': 'fail'}

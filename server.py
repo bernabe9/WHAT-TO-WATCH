@@ -25,8 +25,12 @@ class Peliculas(Resource):
         user_id = int(request.args.get('user_id'))
         user_testset = list(filter(lambda row: row[0] == user_id, testset))
         predictions = algo.test(user_testset)
-        ret = get_top_n_uid(predictions, user_id)
-        return jsonify(list(map(lambda x: str(x), ret)))	 # Fetches first column that is Employee ID
+        movies_id = get_top_n_uid(predictions, user_id)
+        imdb_ids = info.get_movies_imdb_id(movies_id)
+        ret = []
+        for imdb_id in imdb_ids:
+            ret.append(info.get_movie_info(imdb_id))
+        return jsonify(ret)	 # Fetches first column that is Employee ID
 
 class PeliculasSugerencias(Resource):
     def get(self):

@@ -8,7 +8,7 @@ users_ratings = db.users_ratings
 def initialize_user_id_counter():
   db.seqs.insert({
     'collection': 'users_ratings',
-    'id': 0
+    'id': 671
   })
 
 def get_next_sequence():
@@ -24,9 +24,10 @@ def get_users_ratings():
   return users_ratings
 
 def save_user_ratings(ratings):
+  user_id = get_next_sequence()
   for (movieId, rating) in ratings:
     user_rating = {
-      'userId': get_next_sequence(),
+      'userId': user_id,
       'movieId': movieId,
       'rating': rating,
       'timestamp': int(time.time())

@@ -2,7 +2,8 @@ from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
 from collections import defaultdict
 from surprise import Reader, Dataset, SVD, evaluate, dump
-import os
+import users
+import pandas as pd
 
 
 def get_top_n(predictions, n=10):
@@ -28,8 +29,16 @@ def get_top_n_uid(predictions, user_id, n=10):
     return [x[0] for x in top_n_ids]
 
 def inicializar_algoritmo():
-    reader = Reader(line_format='user item rating timestamp', sep=',', skip_lines=1)
-    data = Dataset.load_from_file('./Data/ratings.csv', reader=reader)
+    csv_df = pd.read_csv('Data/ratings.csv')
+    users_mongo = list(users.get_users_ratings().find())
+    mongo_df = pd.DataFrame(users_mongo)
+    mongo_df_new = mongo_df[['userId', 'movieId', 'rating']]
+    csv_df_new = csv_df[['userId', 'movieId', 'rating']]
+    final_df = csv_df_new.append(mongo_df_new)
+    final_df.columns = ['userID', 'itemID', 'rating']
+    reader = Reader()
+    data = Dataset.load_from_df(final_df, reader)
+    data.split(2)  # data can now be used normally0
     trainset = data.build_full_trainset()
     algo = SVD()
     algo.train(trainset)

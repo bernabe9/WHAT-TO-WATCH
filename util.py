@@ -23,15 +23,13 @@ def get_top_n_uid(predictions, user_id, n=10):
     top_n = []
     for uid, iid, true_r, est, _ in predictions:
         if user_id == uid: top_n.append((iid,est))
-    print(top_n)
     top_n.sort(key=lambda x: x[1], reverse=True)
     top_n_ids = top_n[:n]
-    print(top_n_ids)
     return [x[0] for x in top_n_ids]
 
 def inicializar_algoritmo():
-    reader = Reader(line_format='user item rating timestamp', sep='\t')
-    data = Dataset.load_from_file('./ml-100k/u.data', reader=reader)
+    reader = Reader(line_format='user item rating timestamp', sep=',', skip_lines=1)
+    data = Dataset.load_from_file('./Data/ratings.csv', reader=reader)
     trainset = data.build_full_trainset()
     algo = SVD()
     algo.train(trainset)

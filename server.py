@@ -15,7 +15,6 @@ from util import get_top_n_uid, inicializar_algoritmo
 app = Flask(__name__)
 CORS(app)
 api = Api(app)
-print("cheto")
 
 class Peliculas(Resource):
     def get(self):

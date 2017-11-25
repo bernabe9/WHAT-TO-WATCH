@@ -18,11 +18,11 @@ api = Api(app)
 
 class Peliculas(Resource):
     def get(self):
-        user_id = request.args.get('user_id')
+        user_id = int(request.args.get('user_id'))
         user_testset = list(filter(lambda row: row[0] == user_id, testset))
         predictions = algo.test(user_testset)
         ret = get_top_n_uid(predictions, user_id)
-        return jsonify(ret)	 # Fetches first column that is Employee ID
+        return jsonify(list(map(lambda x: str(x), ret)))	 # Fetches first column that is Employee ID
 
 class PeliculasSugerencias(Resource):
     def get(self):

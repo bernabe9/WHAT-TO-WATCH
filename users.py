@@ -28,8 +28,9 @@ def save_user_ratings(ratings):
   for rating in ratings:
     user_rating = {
       'userId': user_id,
-      'movieId': rating['movie_id'],
-      'rating': rating['rating'],
+      'movieId': int(rating['movie_id']),
+      'rating': int(rating['rating']),
       'timestamp': int(time.time())
     }
     users_ratings.insert_one(user_rating)
+  return user_id

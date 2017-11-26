@@ -8,11 +8,10 @@ from flask.json import jsonify
 import ast
 from util import get_top_n_uid, inicializar_algoritmo
 from users import save_user_ratings
+from clasificador import Clasificador
 
 
-# Prepara el algoritmo
-(algo, testset) = inicializar_algoritmo()
-
+clasificador = Clasificador()
 app = Flask(__name__)
 CORS(app)
 api = Api(app)
@@ -23,14 +22,14 @@ parser.add_argument('ratings', action='append')
 class Peliculas(Resource):
     def get(self):
         user_id = int(request.args.get('user_id'))
-        user_testset = list(filter(lambda row: row[0] == user_id, testset))
-        predictions = algo.test(user_testset)
+        user_testset = list(filter(lambda row: row[0] == user_id, clasificador.testset))
+        predictions = clasificador.algo.test(user_testset)
         movies_id = get_top_n_uid(predictions, user_id)
         imdb_ids = info.get_movies_imdb_id(movies_id)
         ret = []
         for imdb_id in imdb_ids:
             ret.append(info.get_movie_info(imdb_id))
-        return jsonify(ret)	 # Fetches first column that is Employee ID
+        return jsonify(ret)
 
 class PeliculasSugerencias(Resource):
     def get(self):
@@ -42,10 +41,11 @@ class CalificarPeliculas(Resource):
         args = parser.parse_args()
         ratings = []
         for rating in args['ratings']:
-            print(ast.literal_eval(rating))
             ratings.append(ast.literal_eval(rating))
-        save_user_ratings(ratings)
-        return '', 204
+        user_id = save_user_ratings(ratings)
+        # Entrenamos nuevamente con los nuevos datos ingresados
+        clasificador.entrenar()
+        return {'user_id': user_id}
 
 
 api.add_resource(Peliculas, '/pelis') # Route_1

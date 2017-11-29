@@ -4,7 +4,7 @@ from collections import defaultdict
 from surprise import Reader, Dataset, SVD, evaluate, dump
 import users
 import pandas as pd
-
+import info
 
 def get_top_n(predictions, n=10):
     # First map the predictions to each user.
@@ -19,13 +19,15 @@ def get_top_n(predictions, n=10):
 
     return top_n
 
-def get_top_n_uid(predictions, user_id, n=10):
+def get_top_n_uid(predictions, user_id, n=9, from_year=2002):
     # First map the predictions to each user.
     top_n = []
     for uid, iid, true_r, est, _ in predictions:
         if user_id == uid: top_n.append((iid,est))
     top_n.sort(key=lambda x: x[1], reverse=True)
-    top_n_ids = top_n[:n]
+    movies_from = info.get_movies_from(from_year)
+    top_n_new = [x for x in top_n if str(x[0]) in movies_from]
+    top_n_ids = top_n_new[:n]
     return [x[0] for x in top_n_ids]
 
 def inicializar_algoritmo():

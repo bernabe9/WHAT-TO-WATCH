@@ -1,0 +1,8 @@
+Flask==0.12.2
+Flask-Cors==3.0.3
+Flask-RESTful==0.3.6
+pandas==0.20.3
+pymongo==3.5.1
+requests==2.18.4
+scikit-surprise==1.0.4
+surprise==0.1
